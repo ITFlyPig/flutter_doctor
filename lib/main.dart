@@ -1,5 +1,7 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdoctor/pages/home/home_page.dart';
+import 'package:flutterdoctor/utils/adapt_ui.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,9 +30,19 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       builder: BotToastInit(), //BotToast初始化
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: LayoutBuilder(
+        builder: (context, _) {
+          _initWithMediaQuery(context);
+          return HomePage();
+        },
+      ),
     );
   }
+}
+
+///需要MediaQuery来初始化初始化，这里的初始化可能会进行多次
+_initWithMediaQuery(BuildContext context) {
+  UIAdaptor.init(context, MediaQuery.of(context));
 }
 
 class MyHomePage extends StatefulWidget {
