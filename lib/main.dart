@@ -1,6 +1,6 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterdoctor/pages/home/home_page.dart';
+import 'package:flutterdoctor/pages/method/method_time_page.dart';
 import 'package:flutterdoctor/utils/adapt_ui.dart';
 
 void main() {
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       home: LayoutBuilder(
         builder: (context, _) {
           _initWithMediaQuery(context);
-          return HomePage();
+          return MethodTimePage();
         },
       ),
     );

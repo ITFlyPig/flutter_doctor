@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:web_socket_channel/html.dart';
 
 class WebSocketHelper<T> {
@@ -7,8 +5,7 @@ class WebSocketHelper<T> {
 
   void listen(void onData(T data), void onStatus(SocketStatus status)) {
     if (_channel == null) {
-      _channel = HtmlWebSocketChannel.connect(
-          "ws://172.16.128.54:8080/websocket/" + 'o');
+      _channel = HtmlWebSocketChannel.connect("ws://121.40.165.18:8800");
     }
     _channel.stream.listen((data) {
       print('Websocket接收到数据' + (data == null ? ' ' : data.toString()));
@@ -18,10 +15,10 @@ class WebSocketHelper<T> {
         return;
       }
       //解析为json格式
-      Map<String, dynamic> _map = json.decode(str);
+//      Map<String, dynamic> _map = json.decode(str);
 
       onStatus?.call(SocketStatus.SUCCESS);
-    }, onError: () {
+    }, onError: (e) {
       onStatus?.call(SocketStatus.ERROR);
     }, onDone: () {
       onStatus?.call(SocketStatus.CLOSE);
