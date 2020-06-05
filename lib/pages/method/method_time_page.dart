@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutterdoctor/base/base_provider.dart';
 import 'package:flutterdoctor/base/base_state.dart';
 import 'package:flutterdoctor/ext/widget_chain.dart';
+import 'package:flutterdoctor/pages/method/bean/method_call_bean.dart';
+import 'package:flutterdoctor/pages/method/widgets/method_widget.dart';
 import 'package:flutterdoctor/socket/websocket_helper.dart';
 import 'package:flutterdoctor/utils/adapt_ui.dart';
 import 'package:provider/provider.dart';
 
+import 'helper/method_draw_helper.dart';
 import 'method_time_presenter.dart';
 import 'method_time_provider.dart';
 
@@ -33,7 +38,9 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
   Widget buildUI(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _provider,
-      child: _buildLayout(),
+      child: Container(
+        child: _buildMethodTimeWidget(),
+      ),
     );
   }
 
@@ -85,5 +92,12 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
         break;
     }
     return statusStr;
+  }
+
+  ///方法时间图表
+  Widget _buildMethodTimeWidget() {
+    MethodCallBean bean =
+        MethodCallBean.fromJson(json.decode(MethodDrawHelper.testJson), null);
+    return MethodWidget(bean);
   }
 }

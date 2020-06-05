@@ -44,9 +44,10 @@ class MethodRenderObject extends RenderProxyBox {
     }
     if (MethodDrawHelper().needMeasure(callBean)) {
       MethodDrawHelper().measure(callBean);
+      MethodDrawHelper().layout(callBean);
     }
-
-    size = Size(callBean.w, constraints.minHeight); //将自身的大小设置为将要绘制的图的大小
+    print('测量得到的size${callBean.w}--${callBean.h}');
+    size = Size(callBean.w, callBean.h); //将自身的大小设置为将要绘制的图的大小
   }
 
   //绘制child

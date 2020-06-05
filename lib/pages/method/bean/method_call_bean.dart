@@ -32,6 +32,10 @@ class MethodCallBean {
   //记录在计算所有child过程中，额外添加的时间，因为为了显示执行时间为0的方法
   //对每个方法的时间执行了 +1 操作
   int extraTime = 0;
+  //对每个拥有child的代码块增加一个额外的宽度，是为了能更好的将child的子块区分开
+  int extraW = 0;
+  //绘制文字的坐标
+  Offset textOffset = Offset.zero;
 
   MethodCallBean(
       {this.classFullName,
