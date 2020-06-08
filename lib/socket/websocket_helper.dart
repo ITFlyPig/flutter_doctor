@@ -5,7 +5,8 @@ class WebSocketHelper<T> {
 
   void listen(void onData(T data), void onStatus(SocketStatus status)) {
     if (_channel == null) {
-      _channel = HtmlWebSocketChannel.connect("ws://10.0.2.2:8080/websocket/o");
+      _channel = HtmlWebSocketChannel.connect(
+          "ws://localhost:8080/doctor/websocket/flutter_draw_01");
     }
     _channel.stream.listen((data) {
       print('Websocket接收到数据' + (data == null ? ' ' : data.toString()));
