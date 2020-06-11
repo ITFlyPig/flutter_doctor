@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutterdoctor/base/base_provider.dart';
 import 'package:flutterdoctor/base/base_state.dart';
 import 'package:flutterdoctor/ext/widget_chain.dart';
@@ -27,6 +29,8 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
     implements IMethodTimeView {
   MethodTimeProvider _provider;
   MethodTimePresenter _presenter;
+  ScrollController _scrollController;
+  double _offset = 0;
 
   @override
   void initState() {
@@ -34,6 +38,26 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
     _provider = MethodTimeProvider();
     _presenter = MethodTimePresenter(this);
     _presenter.startSocket();
+    _scrollController = ScrollController();
+    Timer.periodic(Duration(milliseconds: 500), (timer) {
+      int len = _provider.getCalls()?.length ?? 0;
+      if (len > 0) {
+        print(
+            '当前listview的滚动偏移：${_scrollController.offset} 当前窗口的高度:${ScreenUtil.screenHeight} 宽度：${ScreenUtil.screenWidth} 最后一个项的偏移：${_provider.getCalls()[len - 1].offset}高度:${_provider.getCalls()[len - 1].h}');
+      }
+
+      if (len > 0 &&
+          //最后一个太远还未测量
+          (_provider.getCalls()[len - 1].h == 0 ||
+              //最后一个视图还在在窗口外面
+              (_scrollController.offset + ScreenUtil.screenHeight / 2) <
+                  (_provider.getCalls()[len - 1].offset +
+                      _provider.getCalls()[len - 1].h))) {
+        _offset = _scrollController.offset + 100;
+        _scrollController.animateTo(_offset,
+            duration: Duration(milliseconds: 500), curve: Curves.linear);
+      }
+    });
   }
 
   @override
@@ -100,7 +124,7 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
   Widget _buildMethodTimeWidget() {
     MethodCallBean bean =
         MethodCallBean.fromJson(json.decode(MethodDrawHelper.testJson), null);
-    return MethodWidget(bean);
+    return MethodWidget(bean, null);
   }
 
   ///方法图表
@@ -115,15 +139,24 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
             return Row(
               children: [
                 Container(
-                  child: MethodWidget(
-                    methodTimeProvider.getCalls()[index],
-                  ),
+                  child: MethodWidget(methodTimeProvider.getCalls()[index], () {
+                    MethodCallBean cur = methodTimeProvider.getCalls()[index];
+                    if (index == 0) {
+                      cur.offset = 0;
+                    } else {
+                      MethodCallBean pre =
+                          methodTimeProvider.getCalls()[index - 1];
+                      cur.offset = pre.offset + pre.padding.vertical + pre.h;
+                    }
+                    print('第${index}项的偏移量：${cur.offset}');
+                  }),
                   color: Colours.white,
                 )
               ],
             );
           },
           itemCount: methodTimeProvider.getCalls()?.length ?? 0,
+          controller: _scrollController,
         );
       },
     );

@@ -42,6 +42,9 @@ class MethodCallBean {
   //绘制文字的坐标
   Offset textOffset = Offset.zero;
 
+  //在ListView中的绘制偏移
+  double offset = 0;
+
   MethodCallBean(
       {this.classFullName,
       this.endTime,

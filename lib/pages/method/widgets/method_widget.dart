@@ -9,28 +9,33 @@ import 'package:flutterdoctor/pages/method/helper/method_draw_helper.dart';
 ///
 ///
 
+typedef OnMeasureCallBack = void Function();
+
 class MethodWidget extends SingleChildRenderObjectWidget {
   final MethodCallBean callBean;
+  final OnMeasureCallBack measureCallBack;
 
-  MethodWidget(this.callBean);
+  MethodWidget(this.callBean, this.measureCallBack);
 
   @override
   MethodRenderObject createRenderObject(BuildContext context) {
-    return MethodRenderObject(callBean);
+    return MethodRenderObject(callBean, this.measureCallBack);
   }
 
   @override
   void updateRenderObject(
       BuildContext context, MethodRenderObject renderObject) {
     renderObject.callBean = callBean;
+    renderObject.measureCallBack = measureCallBack;
   }
 }
 
 class MethodRenderObject extends RenderProxyBox {
   MethodCallBean callBean;
   Paint _paint;
+  OnMeasureCallBack measureCallBack;
 
-  MethodRenderObject(this.callBean) {
+  MethodRenderObject(this.callBean, this.measureCallBack) {
     _paint = Paint()
       ..isAntiAlias = true
       ..style = PaintingStyle.fill;
@@ -49,6 +54,8 @@ class MethodRenderObject extends RenderProxyBox {
     print('测量得到的size${callBean.w}--${callBean.h}');
     size = Size(callBean.w + (callBean.padding.horizontal ?? 0),
         callBean.h + (callBean.padding.vertical ?? 0)); //将自身的大小设置为将要绘制的图的大小
+
+    measureCallBack?.call();
   }
 
   //绘制child
