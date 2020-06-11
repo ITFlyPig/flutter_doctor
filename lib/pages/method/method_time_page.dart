@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -50,16 +49,18 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
             '当前listview的滚动偏移：${_scrollController.offset} 当前窗口的高度:${ScreenUtil.screenHeight} 宽度：${ScreenUtil.screenWidth} 最后一个项的偏移：${_provider.getCalls()[len - 1].offset}高度:${_provider.getCalls()[len - 1].h}');
       }
 
-      if (len > 0 &&
-          //最后一个太远还未测量
-          (_provider.getCalls()[len - 1].h == 0 ||
-              //最后一个视图还在在窗口外面
-              (_scrollController.offset + ScreenUtil.screenHeight / 2) <
-                  (_provider.getCalls()[len - 1].offset +
-                      _provider.getCalls()[len - 1].h))) {
-        _offset = _scrollController.offset + 200;
-        _scrollController.animateTo(_offset,
-            duration: Duration(milliseconds: 1000), curve: Curves.linear);
+      if (len > 0) {
+        MethodCallBean last = _provider.getCalls()[len - 1];
+        if (
+            //最后一个太远还未测量
+            last.h == 0 ||
+                //最后一个视图还在在窗口外面
+                (_scrollController.offset + ScreenUtil.screenHeight / 2) <
+                    (last.offset + last.h)) {
+          _offset = _scrollController.offset + 200;
+          _scrollController.animateTo(_offset,
+              duration: Duration(milliseconds: 1000), curve: Curves.linear);
+        }
       }
     });
   }

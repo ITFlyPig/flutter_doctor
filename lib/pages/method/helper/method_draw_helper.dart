@@ -178,12 +178,13 @@ class MethodDrawHelper {
     //绘制方法颜色块
     canvas.drawRect(Rect.fromLTWH(bean.left, bean.top, bean.w, bean.h), paint);
     //绘制文字
-    String text = '${bean.methodName}(${bean.totalTime})';
+    String text =
+        '${_getClassName(bean.classFullName)}.${bean.methodName}(${bean.totalTime})';
     double fontSize = 1.0;
     //测量文字
     Size textSize = _measureText(text, fontSize);
     //文字未调整时绘制的位置
-    Offset offset = Offset(bean.left + bean.w, bean.top);
+    Offset offset = Offset(bean.left + bean.w + 1, bean.top);
     //调整后绘制的位置
 //    Offset adjustedOffset = _adjustTextPos(text, fontSize,
 //        Rect.fromLTWH(offset.dx, offset.dy, textSize.width, textSize.height));
@@ -265,10 +266,11 @@ class MethodDrawHelper {
   ///获取类的名字
   String _getClassName(String fullClassName) {
     if (isEmpty(fullClassName)) return '';
+    fullClassName = fullClassName.replaceAll("/", ".");
     int start = fullClassName.lastIndexOf('.');
     int end = fullClassName.length;
     if ((start + 1) < end && start >= 0) {
-      return fullClassName.substring(start + 2, end);
+      return fullClassName.substring(start + 1, end);
     }
     return '';
   }
