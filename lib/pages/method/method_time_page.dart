@@ -2,12 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutterdoctor/base/base_provider.dart';
 import 'package:flutterdoctor/base/base_state.dart';
 import 'package:flutterdoctor/ext/widget_chain.dart';
 import 'package:flutterdoctor/pages/method/bean/method_call_bean.dart';
 import 'package:flutterdoctor/pages/method/widgets/method_widget.dart';
+import 'package:flutterdoctor/res/colors.dart';
 import 'package:flutterdoctor/socket/websocket_helper.dart';
 import 'package:flutterdoctor/utils/adapt_ui.dart';
 import 'package:provider/provider.dart';
@@ -41,14 +41,7 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
     return ChangeNotifierProvider.value(
       value: _provider,
       child: Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Expanded(
-              child: _buildMethodChart(),
-            )
-          ],
-        ),
+        child: _buildMethodChart(),
       ),
     );
   }
@@ -115,16 +108,19 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
     return AccurateConsumer<MethodTimeProvider>(
       builder: (context, methodTimeProvider) {
         methodTimeProvider.subscribeCalls(context);
+        print(
+            '_buildMethodChart build数量${methodTimeProvider.getCalls()?.length ?? 0}');
         return ListView.builder(
-          shrinkWrap: true,
-          scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
-            return ConstrainedBox(
-              constraints: BoxConstraints.loose(
-                  Size(ScreenUtil.screenWidth, ScreenUtil.screenHeight)),
-              child: Column(
-                children: [MethodWidget(methodTimeProvider.getCalls()[index])],
-              ),
+            return Row(
+              children: [
+                Container(
+                  child: MethodWidget(
+                    methodTimeProvider.getCalls()[index],
+                  ),
+                  color: Colours.white,
+                )
+              ],
             );
           },
           itemCount: methodTimeProvider.getCalls()?.length ?? 0,

@@ -14,9 +14,10 @@ import 'package:flutterdoctor/utils/strings.dart';
 class MethodDrawHelper {
   static const String testJson =
       '{"args":["haha",20],"childs":[{"childs":[{"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242261775,"methodName":"test3","parent":{"\$ref":"\$.childs[0]"},"startTime":1591242260774,"threadInfo":{"id":2,"name":"main"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test2","parent":{"\$ref":"\$"},"startTime":1591242260773,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test1haha","startTime":1591242257772,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}';
-  static const double LEAF_METHOD_W = 100; //叶子节点方法的宽度。
-  static const double TIME_TO_DISTANCE = 10; //时间到距离的映射
+  static const double LEAF_METHOD_H = 100; //叶子节点方法的高度。
+  static const double TIME_TO_DISTANCE = 20; //时间到距离的映射
   static const int EXTRA_W = 3; //额外的宽度
+  static const double DIVIDER_H = 10; //模块之间分割线的高度
 
   /////////////单例实现//////////////////
 
@@ -72,31 +73,44 @@ class MethodDrawHelper {
         measure(bean.childs[i]);
       }
       _calculate(bean);
-      _addExtraW(bean);
+//      _addExtraW(bean);
+    }
+    //增加分割线的高度
+    if (bean.parent == null) {
+      bean.padding = EdgeInsets.only(top: DIVIDER_H);
     }
   }
 
   ///布局
-  void layout(MethodCallBean bean) {
+  void layout(MethodCallBean bean, MethodCallBean leftBrother) {
     if (bean == null) return;
     if (bean.parent == null) {
       bean.left = 0;
+      bean.top = DIVIDER_H;
+    } else if (leftBrother == null) {
+      //表示没有左兄弟
+      bean.left = bean.parent.left;
+      bean.top = bean.parent.top;
+    } else {
+      //表示有左兄弟
+      bean.left = leftBrother.left + leftBrother.w;
+      bean.top = leftBrother.top + leftBrother.h;
     }
+    print('方法${bean.methodName}计算得到的left:${bean.left} top: ${bean.top}');
+
     int childNum = bean.childs?.length ?? 0;
-    double totalLeft = 0;
-    double totalTop = 0;
+    MethodCallBean left;
+    print('开始计算child，child数量：${childNum}');
     for (int i = 0; i < childNum; i++) {
-      MethodCallBean child = bean.childs[i];
-      child.left = totalLeft;
-      child.top = totalTop;
-      totalLeft += child.w;
-      totalTop += child.h;
+      MethodCallBean cur = bean.childs[i];
+      layout(cur, left);
+      left = cur;
     }
   }
 
   ///每个拥有child的代码块增加额外的宽度
   void _addExtraW(MethodCallBean bean) {
-    bean.w += EXTRA_W;
+    bean.h += EXTRA_W;
   }
 
   ///据总时间计算大小
@@ -124,15 +138,15 @@ class MethodDrawHelper {
     int childSize = bean.childs?.length ?? 0;
     if (childSize == 0) {
       //叶子节点
-      bean.w = LEAF_METHOD_W;
-      bean.h = bean.totalTime * TIME_TO_DISTANCE;
+      bean.h = LEAF_METHOD_H;
+      bean.w = bean.totalTime * TIME_TO_DISTANCE;
     } else {
 //      bean.w = childSize * LEAF_METHOD_W;
       bean.childs?.forEach((element) {
-        bean.w += element.w;
+        bean.h += element.h;
       });
       // TODO 这里的高度计算方式有待调整 1、依据得到的totalTime计算；2、按子集合累加得到
-      bean.h = bean.totalTime * TIME_TO_DISTANCE;
+      bean.w = bean.totalTime * TIME_TO_DISTANCE;
     }
     print('_calculateSize 总时间${bean.totalTime},计算得到的高度：${bean.h}');
   }
@@ -149,15 +163,8 @@ class MethodDrawHelper {
     _drawMethodBlock(canvas, paint, bean);
     //绘制child
     int childNum = bean.childs?.length ?? 0;
-    double totalLeft = 0;
-    double totalTop = 0;
     for (int i = 0; i < childNum; i++) {
       MethodCallBean child = bean.childs[i];
-      child.left = totalLeft;
-      child.top = totalTop;
-      //计算child的位置
-      totalLeft += child.w;
-      totalTop += child.h;
       draw(canvas, paint, child);
     }
   }
@@ -176,15 +183,16 @@ class MethodDrawHelper {
     //测量文字
     Size textSize = _measureText(text, fontSize);
     //文字未调整时绘制的位置
-    Offset offset = Offset(bean.left, bean.top + bean.h - textSize.height);
+    Offset offset = Offset(bean.left + bean.w, bean.top);
     //调整后绘制的位置
 //    Offset adjustedOffset = _adjustTextPos(text, fontSize,
 //        Rect.fromLTWH(offset.dx, offset.dy, textSize.width, textSize.height));
-    _drawText(text, canvas, fontSize, Colours.black, offset);
     //绘制文字背景
-//    paint.color = Colours.white;
-//    canvas.drawRect(
-//        Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height), paint);
+    paint.color = Colours.half_trans_white;
+    canvas.drawRect(
+        Rect.fromLTWH(offset.dx, offset.dy, textSize.width, textSize.height),
+        paint);
+    _drawText(text, canvas, fontSize, bean.color, offset);
   }
 
   ///调整文字的绘制，使整个代码块的文字都能不重叠绘制
@@ -244,13 +252,7 @@ class MethodDrawHelper {
         text: TextSpan(
           text: text,
           style: TextStyle(
-              fontSize: fontSize,
-              color: color,
-              shadows: [
-                Shadow(
-                    color: Colors.white, offset: Offset(1, 1), blurRadius: 15)
-              ],
-              fontWeight: FontWeight.w500),
+              fontSize: fontSize, color: color, fontWeight: FontWeight.w500),
         ),
         textScaleFactor: 1.0,
         textDirection: TextDirection.ltr,

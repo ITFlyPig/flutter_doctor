@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutterdoctor/utils/color_pool.dart';
 
 class MethodCallBean {
@@ -21,6 +22,10 @@ class MethodCallBean {
   double w = 0;
   //高
   double h = 0;
+
+  //padding值
+  EdgeInsetsGeometry padding;
+
   //顶部距离
   double top = 0;
   //左边距离

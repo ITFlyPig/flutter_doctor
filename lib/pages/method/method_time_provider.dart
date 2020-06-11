@@ -26,6 +26,7 @@ class MethodTimeProvider extends BaseProvider {
     }
     calls.add(callBean);
     setCalls(calls);
+    print('添加后的数量${calls.length}');
   }
 
   void subscribeCalls(BuildContext context) {
