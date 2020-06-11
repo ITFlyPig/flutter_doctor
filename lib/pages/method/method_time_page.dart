@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutterdoctor/base/base_provider.dart';
 import 'package:flutterdoctor/base/base_state.dart';
 import 'package:flutterdoctor/ext/widget_chain.dart';
@@ -39,7 +41,14 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
     return ChangeNotifierProvider.value(
       value: _provider,
       child: Container(
-        child: _buildMethodTimeWidget(),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: _buildMethodChart(),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -99,5 +108,35 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
     MethodCallBean bean =
         MethodCallBean.fromJson(json.decode(MethodDrawHelper.testJson), null);
     return MethodWidget(bean);
+  }
+
+  ///方法图表
+  Widget _buildMethodChart() {
+    return AccurateConsumer<MethodTimeProvider>(
+      builder: (context, methodTimeProvider) {
+        methodTimeProvider.subscribeCalls(context);
+        return ListView.builder(
+          shrinkWrap: true,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) {
+            return ConstrainedBox(
+              constraints: BoxConstraints.loose(
+                  Size(ScreenUtil.screenWidth, ScreenUtil.screenHeight)),
+              child: Column(
+                children: [MethodWidget(methodTimeProvider.getCalls()[index])],
+              ),
+            );
+          },
+          itemCount: methodTimeProvider.getCalls()?.length ?? 0,
+        );
+      },
+    );
+  }
+
+  @override
+  void onNewCall(MethodCallBean bean) {
+    if (mounted) {
+      _provider.addCall(bean);
+    }
   }
 }

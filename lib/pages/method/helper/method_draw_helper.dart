@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdoctor/pages/method/bean/method_call_bean.dart';
+import 'package:flutterdoctor/res/colors.dart';
 import 'package:flutterdoctor/utils/color_pool.dart';
 import 'package:flutterdoctor/utils/strings.dart';
 
@@ -13,7 +14,7 @@ import 'package:flutterdoctor/utils/strings.dart';
 class MethodDrawHelper {
   static const String testJson =
       '{"args":["haha",20],"childs":[{"childs":[{"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242261775,"methodName":"test3","parent":{"\$ref":"\$.childs[0]"},"startTime":1591242260774,"threadInfo":{"id":2,"name":"main"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test2","parent":{"\$ref":"\$"},"startTime":1591242260773,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test1haha","startTime":1591242257772,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}';
-  static const double LEAF_METHOD_W = 50; //叶子节点方法的宽度。
+  static const double LEAF_METHOD_W = 100; //叶子节点方法的宽度。
   static const double TIME_TO_DISTANCE = 10; //时间到距离的映射
   static const int EXTRA_W = 3; //额外的宽度
 
@@ -124,14 +125,14 @@ class MethodDrawHelper {
     if (childSize == 0) {
       //叶子节点
       bean.w = LEAF_METHOD_W;
-      bean.h = bean.totalTime / 1000 * TIME_TO_DISTANCE;
+      bean.h = bean.totalTime * TIME_TO_DISTANCE;
     } else {
 //      bean.w = childSize * LEAF_METHOD_W;
       bean.childs?.forEach((element) {
         bean.w += element.w;
       });
       // TODO 这里的高度计算方式有待调整 1、依据得到的totalTime计算；2、按子集合累加得到
-      bean.h = bean.totalTime / 1000 * TIME_TO_DISTANCE;
+      bean.h = bean.totalTime * TIME_TO_DISTANCE;
     }
     print('_calculateSize 总时间${bean.totalTime},计算得到的高度：${bean.h}');
   }
@@ -170,18 +171,16 @@ class MethodDrawHelper {
     //绘制方法颜色块
     canvas.drawRect(Rect.fromLTWH(bean.left, bean.top, bean.w, bean.h), paint);
     //绘制文字
-    String text =
-        '${_getClassName(bean.classFullName)}.${bean.methodName}(${bean.totalTime})';
-    double fontSize = 10.0;
+    String text = '${bean.methodName}(${bean.totalTime})';
+    double fontSize = 1.0;
     //测量文字
     Size textSize = _measureText(text, fontSize);
     //文字未调整时绘制的位置
-    Offset offset =
-        Offset(bean.left + bean.w, bean.top + bean.h - textSize.height);
+    Offset offset = Offset(bean.left, bean.top + bean.h - textSize.height);
     //调整后绘制的位置
 //    Offset adjustedOffset = _adjustTextPos(text, fontSize,
 //        Rect.fromLTWH(offset.dx, offset.dy, textSize.width, textSize.height));
-    _drawText(text, canvas, fontSize, bean.color, offset);
+    _drawText(text, canvas, fontSize, Colours.black, offset);
     //绘制文字背景
 //    paint.color = Colours.white;
 //    canvas.drawRect(
@@ -244,10 +243,16 @@ class MethodDrawHelper {
     TextPainter textPainter = TextPainter(
         text: TextSpan(
           text: text,
-          style: TextStyle(fontSize: fontSize, color: color, shadows: [
-            Shadow(color: Colors.white, offset: Offset(6, 3), blurRadius: 10)
-          ]),
+          style: TextStyle(
+              fontSize: fontSize,
+              color: color,
+              shadows: [
+                Shadow(
+                    color: Colors.white, offset: Offset(1, 1), blurRadius: 15)
+              ],
+              fontWeight: FontWeight.w500),
         ),
+        textScaleFactor: 1.0,
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.left)
       ..layout(maxWidth: double.infinity)
@@ -261,7 +266,7 @@ class MethodDrawHelper {
     int start = fullClassName.lastIndexOf('.');
     int end = fullClassName.length;
     if ((start + 1) < end && start >= 0) {
-      return fullClassName.substring(start + 1, end);
+      return fullClassName.substring(start + 2, end);
     }
     return '';
   }

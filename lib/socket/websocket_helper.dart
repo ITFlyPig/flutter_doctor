@@ -3,7 +3,7 @@ import 'package:web_socket_channel/html.dart';
 class WebSocketHelper<T> {
   HtmlWebSocketChannel _channel;
 
-  void listen(void onData(T data), void onStatus(SocketStatus status)) {
+  void listen(void onData(String data), void onStatus(SocketStatus status)) {
     if (_channel == null) {
       _channel = HtmlWebSocketChannel.connect(
           "ws://localhost:8080/doctor/websocket/flutter_draw_01");
@@ -11,8 +11,8 @@ class WebSocketHelper<T> {
     _channel.stream.listen((data) {
       print('Websocket接收到数据' + (data == null ? ' ' : data.toString()));
       String str = data?.toString();
-      if (str == null) {
-        onData?.call(null);
+      if (str != null) {
+        onData?.call(str);
         return;
       }
       //解析为json格式
