@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -31,6 +32,8 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
   MethodTimePresenter _presenter;
   ScrollController _scrollController;
   double _offset = 0;
+  Timer _timer;
+  bool _stopScroll = false;
 
   @override
   void initState() {
@@ -39,7 +42,8 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
     _presenter = MethodTimePresenter(this);
     _presenter.startSocket();
     _scrollController = ScrollController();
-    Timer.periodic(Duration(milliseconds: 500), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
+      if (_stopScroll) return;
       int len = _provider.getCalls()?.length ?? 0;
       if (len > 0) {
         print(
@@ -53,9 +57,9 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
               (_scrollController.offset + ScreenUtil.screenHeight / 2) <
                   (_provider.getCalls()[len - 1].offset +
                       _provider.getCalls()[len - 1].h))) {
-        _offset = _scrollController.offset + 100;
+        _offset = _scrollController.offset + 200;
         _scrollController.animateTo(_offset,
-            duration: Duration(milliseconds: 500), curve: Curves.linear);
+            duration: Duration(milliseconds: 1000), curve: Curves.linear);
       }
     });
   }
@@ -64,8 +68,16 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
   Widget buildUI(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _provider,
-      child: Container(
-        child: _buildMethodChart(),
+      child: GestureDetector(
+        onTapDown: (detail) {
+          _stopScroll = true;
+        },
+        onTapUp: (detail) {
+          _stopScroll = false;
+        },
+        child: Container(
+          child: _buildMethodChart(),
+        ),
       ),
     );
   }
