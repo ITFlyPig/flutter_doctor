@@ -41,28 +41,45 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
     _presenter = MethodTimePresenter(this);
     _presenter.startSocket();
     _scrollController = ScrollController();
-    _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
-      if (_stopScroll) return;
-      int len = _provider.getCalls()?.length ?? 0;
-      if (len > 0) {
-        print(
-            '当前listview的滚动偏移：${_scrollController.offset} 当前窗口的高度:${ScreenUtil.screenHeight} 宽度：${ScreenUtil.screenWidth} 最后一个项的偏移：${_provider.getCalls()[len - 1].offset}高度:${_provider.getCalls()[len - 1].h}');
-      }
+  }
 
-      if (len > 0) {
-        MethodCallBean last = _provider.getCalls()[len - 1];
-        if (
-            //最后一个太远还未测量
-            last.h == 0 ||
-                //最后一个视图还在在窗口外面
-                (_scrollController.offset + ScreenUtil.screenHeight / 2) <
-                    (last.offset + last.h)) {
+  ///停止计时
+  void _stopTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  bool _shouldScroll() {
+    int len = _provider.getCalls()?.length ?? 0;
+    if (len <= 0) return false;
+    MethodCallBean last = _provider.getCalls()[len - 1];
+    if (len > 0) {
+      if (
+          //最后一个太远还未测量
+          last.h == 0 ||
+              //最后一个视图还在在窗口外面
+              (_scrollController.offset + ScreenUtil.screenHeight / 2) <
+                  (last.offset + last.h)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  ///开始计时
+  void _startTimer() {
+    if (_shouldScroll() && _timer == null) {
+      _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
+        if (_stopScroll) return;
+        if (_shouldScroll()) {
           _offset = _scrollController.offset + 200;
           _scrollController.animateTo(_offset,
               duration: Duration(milliseconds: 1000), curve: Curves.linear);
+//          print(
+//              '当前listview的滚动偏移：${_scrollController.offset} 当前窗口的高度:${ScreenUtil.screenHeight} 宽度：${ScreenUtil.screenWidth} 最后一个项的偏移：${_provider.getCalls()[len - 1].offset}高度:${_provider.getCalls()[len - 1].h}');
         }
-      }
-    });
+      });
+    }
   }
 
   @override
@@ -72,9 +89,11 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
       child: GestureDetector(
         onTapDown: (detail) {
           _stopScroll = true;
+          _stopTimer();
         },
         onTapUp: (detail) {
           _stopScroll = false;
+          _startTimer();
         },
         child: Container(
           child: _buildMethodChart(),
@@ -179,6 +198,9 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
   void onNewCall(MethodCallBean bean) {
     if (mounted) {
       _provider.addCall(bean);
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        _startTimer();
+      });
     }
   }
 }

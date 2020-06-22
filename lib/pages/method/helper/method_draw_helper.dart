@@ -15,7 +15,7 @@ class MethodDrawHelper {
   static const String testJson =
       '{"args":["haha",20],"childs":[{"childs":[{"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242261775,"methodName":"test3","parent":{"\$ref":"\$.childs[0]"},"startTime":1591242260774,"threadInfo":{"id":2,"name":"main"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test2","parent":{"\$ref":"\$"},"startTime":1591242260773,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test1haha","startTime":1591242257772,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}';
   static const double LEAF_METHOD_H = 100; //叶子节点方法的高度。
-  static const double TIME_TO_DISTANCE = 20; //时间到距离的映射
+  static const double TIME_TO_DISTANCE = 0.5; //时间到距离的映射
   static const int EXTRA_W = 3; //额外的宽度
   static const double DIVIDER_H = 10; //模块之间分割线的高度
 
