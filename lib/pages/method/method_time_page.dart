@@ -91,7 +91,7 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
           _stopScroll = true;
           _stopTimer();
         },
-        onTapUp: (detail) {
+        onDoubleTap: () {
           _stopScroll = false;
           _startTimer();
         },

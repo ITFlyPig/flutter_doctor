@@ -15,7 +15,7 @@ class MethodDrawHelper {
   static const String testJson =
       '{"args":["haha",20],"childs":[{"childs":[{"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242261775,"methodName":"test3","parent":{"\$ref":"\$.childs[0]"},"startTime":1591242260774,"threadInfo":{"id":2,"name":"main"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test2","parent":{"\$ref":"\$"},"startTime":1591242260773,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test1haha","startTime":1591242257772,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}';
   static const double LEAF_METHOD_H = 100; //叶子节点方法的高度。
-  static const double TIME_TO_DISTANCE = 0.5; //时间到距离的映射
+  static const double TIME_TO_DISTANCE = 1; //时间到距离的映射
   static const int EXTRA_W = 3; //额外的宽度
   static const double DIVIDER_H = 10; //模块之间分割线的高度
 
@@ -83,7 +83,7 @@ class MethodDrawHelper {
 
   ///布局
   void layout(MethodCallBean bean, MethodCallBean leftBrother) {
-    if (bean == null) return;
+    if (bean == null || bean.w <= 0) return;
     if (bean.parent == null) {
       bean.left = 0;
       bean.top = DIVIDER_H;
@@ -124,12 +124,11 @@ class MethodDrawHelper {
   ///计算总时间
   void _calculateTotalTime(MethodCallBean bean) {
     if (bean == null) return;
-    bean.totalTime =
-        (bean.endTime ?? 0) - (bean.startTime ?? 0) + bean.extraTime;
+    bean.totalTime = (bean.endTime ?? 0) - (bean.startTime ?? 0);
     //执行加1操作
-    bean.totalTime++;
+//    bean.totalTime++;
     //更新父节点的额外时间
-    bean.extraTime = bean.extraTime + 1;
+//    bean.extraTime = bean.extraTime + 1;
   }
 
   //计算大小
@@ -153,7 +152,8 @@ class MethodDrawHelper {
 
   ///绘制，其实其中也包含了计算位置的逻辑，一次遍历 计算 + 绘制
   void draw(Canvas canvas, Paint paint, MethodCallBean bean) {
-    if (canvas == null || paint == null || bean == null) return;
+    if (canvas == null || paint == null || bean == null || (bean.w ?? 0) <= 0)
+      return;
     //开始绘制一个新的代码块
     if (bean.parent == null) {
       //重置文本绘制位置
@@ -186,33 +186,31 @@ class MethodDrawHelper {
     //文字未调整时绘制的位置
     Offset offset = Offset(bean.left + bean.w + 1, bean.top);
     //调整后绘制的位置
-//    Offset adjustedOffset = _adjustTextPos(text, fontSize,
-//        Rect.fromLTWH(offset.dx, offset.dy, textSize.width, textSize.height));
+    Offset adjustedOffset = _adjustTextPos(text, fontSize,
+        Rect.fromLTWH(offset.dx, offset.dy, textSize.width, textSize.height));
     //绘制文字背景
     paint.color = Colours.half_trans_white;
     canvas.drawRect(
-        Rect.fromLTWH(offset.dx, offset.dy, textSize.width, textSize.height),
+        Rect.fromLTWH(adjustedOffset.dx, adjustedOffset.dy, textSize.width,
+            textSize.height),
         paint);
-    _drawText(text, canvas, fontSize, bean.color, offset);
+    _drawText(text, canvas, fontSize, bean.color, adjustedOffset);
   }
 
-  ///调整文字的绘制，使整个代码块的文字都能不重叠绘制
+  ///调整文字的绘制，避免文字的重叠绘制
   Offset _adjustTextPos(String text, double fontSize, Rect textRect) {
     if (isEmpty(text) || textRect == null) return Offset.zero;
     int len = textRects.length;
-    if (len == 0) {
-      textRects.add(textRect);
-    } else {
-      for (int i = 0; i < len; i++) {
-        Rect pre = textRects[i];
-        if (_isHit(pre, textRect)) {
-          Rect newRect = Rect.fromLTWH(
-              textRect.left, pre.bottom, textRect.width, textRect.height);
-          textRects.add(newRect);
-          return Offset(newRect.left, newRect.top);
-        }
+    for (int i = (len - 1); i >= 0; i--) {
+      Rect pre = textRects[i];
+      if (_isHit(pre, textRect)) {
+        Rect newRect = Rect.fromLTWH(
+            textRect.left, pre.bottom, textRect.width, textRect.height);
+        textRects.add(newRect);
+        return Offset(newRect.left, newRect.top);
       }
     }
+    textRects.add(textRect);
     return Offset(textRect.left, textRect.top);
   }
 
