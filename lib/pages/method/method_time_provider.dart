@@ -14,6 +14,13 @@ class MethodTimeProvider extends BaseProvider {
     return _calls.get();
   }
 
+  void clearAll() {
+    List<MethodCallBean> beans = _calls.get();
+    beans?.clear();
+    _calls.set(beans);
+    print('clearAll');
+  }
+
   void setCalls(List<MethodCallBean> calls) {
     _calls.set(calls);
   }

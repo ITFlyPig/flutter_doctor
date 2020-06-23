@@ -50,4 +50,6 @@ class Colours {
   static const Color color_0D2662 = Color(0xFF0B275F);
   static const Color color_yes = Color(0xFFee4343);
   static const Color color_no = Color(0xFF3390ff);
+  //文字的颜色定义（名字有具体的意思）
+
 }

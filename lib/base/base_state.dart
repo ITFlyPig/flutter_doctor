@@ -1,6 +1,5 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterdoctor/router/fluro_navigator.dart';
 import 'package:flutterdoctor/utils/strings.dart';
 
 import 'base_view.dart';
@@ -114,17 +113,9 @@ abstract class BaseState<T extends StatefulWidget> extends State<T>
   }
 
   ///开始一个页面
-  start(String path, Map<String, String> params,
-      {Function(Object) function, bool clearStack = false}) {
-    if (function == null) {
-      //不需要返回数据
-      NavigatorUtils.push(context, path,
-          params: params, clearStack: clearStack);
-    } else {
-      //需要返回数据
-      NavigatorUtils.pushResult(context, path, function,
-          params: params, clearStack: clearStack);
-    }
+  start(WidgetBuilder builder) {
+    if (builder == null) return;
+    Navigator.push(context, new MaterialPageRoute(builder: builder));
   }
 
   @override

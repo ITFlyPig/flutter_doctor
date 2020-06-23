@@ -6,12 +6,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutterdoctor/base/base_provider.dart';
 import 'package:flutterdoctor/base/base_state.dart';
+import 'package:flutterdoctor/event/change_scale_event.dart';
 import 'package:flutterdoctor/ext/widget_chain.dart';
 import 'package:flutterdoctor/pages/method/bean/method_call_bean.dart';
 import 'package:flutterdoctor/pages/method/widgets/method_widget.dart';
+import 'package:flutterdoctor/pages/setting/setting_page.dart';
 import 'package:flutterdoctor/res/colors.dart';
 import 'package:flutterdoctor/socket/websocket_helper.dart';
 import 'package:flutterdoctor/utils/adapt_ui.dart';
+import 'package:flutterdoctor/utils/event_bus_util.dart';
+import 'package:flutterdoctor/utils/image_utils.dart';
 import 'package:provider/provider.dart';
 
 import 'helper/method_draw_helper.dart';
@@ -41,6 +45,10 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
     _presenter = MethodTimePresenter(this);
     _presenter.startSocket();
     _scrollController = ScrollController();
+
+    EventBusUtil.on<ChangeScaleEvent>().listen((event) {
+      _provider.clearAll();
+    });
   }
 
   ///停止计时
@@ -86,21 +94,27 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
   Widget buildUI(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _provider,
-      child: GestureDetector(
-        onTapDown: (detail) {
-          _stopScroll = true;
-          _stopTimer();
-        },
-        onDoubleTap: () {
-          _stopScroll = false;
-          _startTimer();
-        },
-//        onTap: () {
-//          _presenter.addTestData();
-//        },
+      child: Container(
+        child: Stack(
+          children: [_buildMethodChart(), _buildSetting()],
+        ),
+      ),
+    );
+  }
 
-        child: Container(
-          child: _buildMethodChart(),
+  ///设置
+  Widget _buildSetting() {
+    return Align(
+      alignment: Alignment.topRight,
+      child: Container(
+        margin: EdgeInsets.only(top: UIAdaptor.h(20)),
+        width: UIAdaptor.w(80),
+        height: UIAdaptor.h(80),
+        child: GestureDetector(
+          child: loadAssetImage('ic_setting'),
+          onTap: () {
+            start((context) => SettingPage());
+          },
         ),
       ),
     );
@@ -165,36 +179,53 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
 
   ///方法图表
   Widget _buildMethodChart() {
-    return AccurateConsumer<MethodTimeProvider>(
-      builder: (context, methodTimeProvider) {
-        methodTimeProvider.subscribeCalls(context);
-        print(
-            '_buildMethodChart build数量${methodTimeProvider.getCalls()?.length ?? 0}');
-        return ListView.builder(
-          itemBuilder: (context, index) {
-            return Row(
-              children: [
-                Container(
-                  child: MethodWidget(methodTimeProvider.getCalls()[index], () {
-                    MethodCallBean cur = methodTimeProvider.getCalls()[index];
-                    if (index == 0) {
-                      cur.offset = 0;
-                    } else {
-                      MethodCallBean pre =
-                          methodTimeProvider.getCalls()[index - 1];
-                      cur.offset = pre.offset + pre.padding.vertical + pre.h;
-                    }
-                    print('第${index}项的偏移量：${cur.offset}');
-                  }),
-                  color: Colours.white,
-                )
-              ],
-            );
-          },
-          itemCount: methodTimeProvider.getCalls()?.length ?? 0,
-          controller: _scrollController,
-        );
+    return GestureDetector(
+      onTapDown: (detail) {
+        _stopScroll = true;
+        _stopTimer();
       },
+      onDoubleTap: () {
+        _stopScroll = false;
+        _startTimer();
+      },
+      child: AccurateConsumer<MethodTimeProvider>(
+        builder: (context, methodTimeProvider) {
+          methodTimeProvider.subscribeCalls(context);
+          print(
+              '_buildMethodChart build数量${methodTimeProvider.getCalls()?.length ?? 0}');
+          return ListView.builder(
+            itemBuilder: (context, index) {
+              return Row(
+                children: [
+                  Container(
+                    child: SingleChildScrollView(
+                      child: MethodWidget(methodTimeProvider.getCalls()[index],
+                          () {
+                        MethodCallBean cur =
+                            methodTimeProvider.getCalls()[index];
+                        if (index == 0) {
+                          cur.offset = 0;
+                        } else {
+                          MethodCallBean pre =
+                              methodTimeProvider.getCalls()[index - 1];
+                          cur.offset =
+                              pre.offset + pre.padding.vertical + pre.h;
+                        }
+                        print('第${index}项的偏移量：${cur.offset}');
+                      }),
+                      scrollDirection: Axis.horizontal,
+                    ),
+                    color: Colours.white,
+                    width: ScreenUtil.screenHeight,
+                  )
+                ],
+              );
+            },
+            itemCount: methodTimeProvider.getCalls()?.length ?? 0,
+            controller: _scrollController,
+          );
+        },
+      ),
     );
   }
 
