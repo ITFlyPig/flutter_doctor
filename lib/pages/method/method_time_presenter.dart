@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutterdoctor/base/base_view.dart';
+import 'package:flutterdoctor/pages/method/helper/method_draw_helper.dart';
 import 'package:flutterdoctor/socket/websocket_helper.dart';
 import 'package:flutterdoctor/utils/strings.dart';
 
@@ -34,5 +35,14 @@ class MethodTimePresenter {
     }, (status) {
       _view.updateSocketStatus(status);
     });
+  }
+
+  ///添加测试数据
+  void addTestData() {
+    MethodCallBean bean =
+        MethodCallBean.fromJson(json.decode(MethodDrawHelper.testJson), null);
+    if (bean != null) {
+      _view.onNewCall(bean);
+    }
   }
 }

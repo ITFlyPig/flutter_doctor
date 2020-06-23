@@ -95,6 +95,10 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
           _stopScroll = false;
           _startTimer();
         },
+//        onTap: () {
+//          _presenter.addTestData();
+//        },
+
         child: Container(
           child: _buildMethodChart(),
         ),

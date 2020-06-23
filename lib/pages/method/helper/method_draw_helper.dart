@@ -13,26 +13,27 @@ import 'package:flutterdoctor/utils/strings.dart';
 
 class MethodDrawHelper {
   static const String testJson =
-      '{"args":["haha",20],"childs":[{"childs":[{"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242261775,"methodName":"test3","parent":{"\$ref":"\$.childs[0]"},"startTime":1591242260774,"threadInfo":{"id":2,"name":"main"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test2","parent":{"\$ref":"\$"},"startTime":1591242260773,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}],"classFullName":"com.wyl.appdoctor.MainActivity","endTime":1591242263776,"methodName":"test1haha","startTime":1591242257772,"threadInfo":{"\$ref":"\$.childs[0].childs[0].threadInfo"},"type":5}';
-  static const double LEAF_METHOD_H = 100; //叶子节点方法的高度。
-  static const double TIME_TO_DISTANCE = 1; //时间到距离的映射
+      '{ "childs": [ { "classFullName": "com/talk51/kid/network/ParamsInterceptor", "endTime": 1592820987561, "methodName": "checkIfCCRequest", "methodSignature": "(Lokhttp3/Request;)Z", "parent": { "\$ref": "\$" }, "startTime": 1592820987561, "threadInfo": { "id": 1456, "name": "OkHttp https://appkidi.51talk.com/..." }, "type": 5 }, { "classFullName": "com/talk51/kid/network/ParamsInterceptor", "endTime": 1592820987562, "methodName": "getPublicParamsUrl", "methodSignature": "(Ljava/lang/String;)Ljava/lang/String;", "parent": { "\$ref": "\$" }, "startTime": 1592820987561, "threadInfo": { "\$ref": "\$.childs[0].threadInfo" }, "type": 5 }, { "classFullName": "com/talk51/kid/core/app/MainApplication", "endTime": 1592820987562, "methodName": "inst", "methodSignature": "()Lcom/talk51/kid/core/app/MainApplication;", "parent": { "\$ref": "\$" }, "startTime": 1592820987562, "threadInfo": { "\$ref": "\$.childs[0].threadInfo" }, "type": 5 }, { "classFullName": "com/talk51/kid/network/ParamsInterceptor", "endTime": 1592820987564, "methodName": "generateTsignValue", "methodSignature": "(Ljava/util/TreeMap;)Ljava/lang/String;", "parent": { "\$ref": "\$" }, "startTime": 1592820987562, "threadInfo": { "\$ref": "\$.childs[0].threadInfo" }, "type": 5 }, { "childs": [ { "classFullName": "com/talk51/kid/network/CheckLoginInterceptor", "endTime": 1592820987800, "methodName": "checkAppiRequest", "methodSignature": "(Lokhttp3/Request;)Z", "parent": { "\$ref": "\$.childs[4]" }, "startTime": 1592820987800, "threadInfo": { "\$ref": "\$.childs[0].threadInfo" }, "type": 5 }, { "childs": [ { "classFullName": "com/talk51/kid/network/CheckLoginInterceptor", "endTime": 1592820987812, "methodName": "isPlaintext", "methodSignature": "(Lokio/Buffer;)Z", "parent": { "\$ref": "\$.childs[4].childs[1]" }, "startTime": 1592820987810, "threadInfo": { "\$ref": "\$.childs[0].threadInfo" }, "type": 5 } ], "classFullName": "com/talk51/kid/network/CheckLoginInterceptor", "endTime": 1592820987815, "methodName": "readResponseStr", "methodSignature": "(Lokhttp3/Response;)Ljava/lang/String;", "parent": { "\$ref": "\$.childs[4]" }, "startTime": 1592820987800, "threadInfo": { "\$ref": "\$.childs[0].threadInfo" }, "type": 5 } ], "classFullName": "com/talk51/kid/network/CheckLoginInterceptor", "endTime": 1592820987818, "methodName": "intercept", "methodSignature": "(Lokhttp3/Interceptor\$Chain;)Lokhttp3/Response;", "parent": { "\$ref": "\$" }, "startTime": 1592820987565, "threadInfo": { "\$ref": "\$.childs[0].threadInfo" }, "type": 5 } ], "classFullName": "com/talk51/kid/network/ParamsInterceptor", "endTime": 1592820987818, "methodName": "intercept", "methodSignature": "(Lokhttp3/Interceptor\$Chain;)Lokhttp3/Response;", "startTime": 1592820987561, "threadInfo": { "\$ref": "\$.childs[0].threadInfo" }, "type": 5 }';
+  static const double LEAF_METHOD_H = 50; //叶子节点方法的高度。
+  static const double TIME_TO_DISTANCE = 0.5; //时间到距离的映射
   static const int EXTRA_W = 3; //额外的宽度
+  static const int EXTRA_H = 3; //额外的高度
   static const double DIVIDER_H = 10; //模块之间分割线的高度
 
   /////////////单例实现//////////////////
-
-  static MethodDrawHelper _instance;
-
-  MethodDrawHelper._();
-
-  static MethodDrawHelper _getInstance() {
-    if (_instance == null) {
-      _instance = MethodDrawHelper._();
-    }
-    return _instance;
-  }
-
-  factory MethodDrawHelper() => _getInstance();
+//
+//  static MethodDrawHelper _instance;
+//
+//  MethodDrawHelper._();
+//
+//  static MethodDrawHelper _getInstance() {
+//    if (_instance == null) {
+//      _instance = MethodDrawHelper._();
+//    }
+//    return _instance;
+//  }
+//
+//  factory MethodDrawHelper() => _getInstance();
 
   ///////////////////////////////
 
@@ -83,7 +84,7 @@ class MethodDrawHelper {
 
   ///布局
   void layout(MethodCallBean bean, MethodCallBean leftBrother) {
-    if (bean == null || bean.w <= 0) return;
+    if (bean == null) return;
     if (bean.parent == null) {
       bean.left = 0;
       bean.top = DIVIDER_H;
@@ -152,8 +153,7 @@ class MethodDrawHelper {
 
   ///绘制，其实其中也包含了计算位置的逻辑，一次遍历 计算 + 绘制
   void draw(Canvas canvas, Paint paint, MethodCallBean bean) {
-    if (canvas == null || paint == null || bean == null || (bean.w ?? 0) <= 0)
-      return;
+    if (canvas == null || paint == null || bean == null) return;
     //开始绘制一个新的代码块
     if (bean.parent == null) {
       //重置文本绘制位置
@@ -191,7 +191,7 @@ class MethodDrawHelper {
     //绘制文字背景
     paint.color = Colours.half_trans_white;
     canvas.drawRect(
-        Rect.fromLTWH(adjustedOffset.dx, adjustedOffset.dy, textSize.width,
+        Rect.fromLTWH(adjustedOffset.dx, adjustedOffset.dy, textSize.width + 5,
             textSize.height),
         paint);
     _drawText(text, canvas, fontSize, bean.color, adjustedOffset);

@@ -13,7 +13,7 @@ class Colours {
   static const Color border_color = Color(0xFFE3E3E3);
   static const Color list_bg_color = Color(0xFFF3F5F7);
   static const Color half_trans = Color(0x80000000);
-  static const Color half_trans_white = Color(0xA0ffffff);
+  static const Color half_trans_white = Color(0x30ffffff);
   static const Color trans = Color(0x00000000);
   static const Color trans_1 = Color(0x01000000);
 

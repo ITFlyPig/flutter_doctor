@@ -34,11 +34,13 @@ class MethodRenderObject extends RenderProxyBox {
   MethodCallBean callBean;
   Paint _paint;
   OnMeasureCallBack measureCallBack;
+  MethodDrawHelper methodDrawHelper;
 
   MethodRenderObject(this.callBean, this.measureCallBack) {
     _paint = Paint()
       ..isAntiAlias = true
       ..style = PaintingStyle.fill;
+    methodDrawHelper = MethodDrawHelper();
   }
 
   //据child计算自己的大小
@@ -47,9 +49,9 @@ class MethodRenderObject extends RenderProxyBox {
     if (callBean == null) {
       size = Size.zero;
     }
-    if (MethodDrawHelper().needMeasure(callBean)) {
-      MethodDrawHelper().measure(callBean);
-      MethodDrawHelper().layout(callBean, null);
+    if (methodDrawHelper.needMeasure(callBean)) {
+      methodDrawHelper.measure(callBean);
+      methodDrawHelper.layout(callBean, null);
     }
     print('测量得到的size${callBean.w}--${callBean.h}');
     size = Size(callBean.w + (callBean.padding.horizontal ?? 0),
@@ -62,6 +64,6 @@ class MethodRenderObject extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     super.paint(context, offset);
-    MethodDrawHelper().draw(context.canvas, _paint, callBean);
+    methodDrawHelper.draw(context.canvas, _paint, callBean);
   }
 }
