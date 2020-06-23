@@ -96,26 +96,42 @@ class _MethodTimePageState extends BaseState<MethodTimePage>
       value: _provider,
       child: Container(
         child: Stack(
-          children: [_buildMethodChart(), _buildSetting()],
+          children: [
+            _buildMethodChart(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [_buildClearAll(), _buildSetting()],
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  ///清除现有的数据
+  Widget _buildClearAll() {
+    return GestureDetector(
+      onTap: () {
+        _provider?.clearAll();
+      },
+      child: Container(
+        width: UIAdaptor.w(80),
+        height: UIAdaptor.h(80),
+        child: loadAssetImage('ic_clear_all'),
       ),
     );
   }
 
   ///设置
   Widget _buildSetting() {
-    return Align(
-      alignment: Alignment.topRight,
-      child: Container(
-        margin: EdgeInsets.only(top: UIAdaptor.h(20)),
-        width: UIAdaptor.w(80),
-        height: UIAdaptor.h(80),
-        child: GestureDetector(
-          child: loadAssetImage('ic_setting'),
-          onTap: () {
-            start((context) => SettingPage());
-          },
-        ),
+    return Container(
+      width: UIAdaptor.w(80),
+      height: UIAdaptor.h(80),
+      child: GestureDetector(
+        child: loadAssetImage('ic_setting'),
+        onTap: () {
+          start((context) => SettingPage());
+        },
       ),
     );
   }

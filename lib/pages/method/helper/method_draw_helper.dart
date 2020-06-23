@@ -88,14 +88,35 @@ class MethodDrawHelper {
     if (bean.parent == null) {
       bean.left = 0;
       bean.top = DIVIDER_H;
-    } else if (leftBrother == null) {
-      //表示没有左兄弟
-      bean.left = bean.parent.left;
-      bean.top = bean.parent.top;
     } else {
-      //表示有左兄弟
-      bean.left = leftBrother.left + leftBrother.w;
-      bean.top = leftBrother.top + leftBrother.h;
+      int parentTotalTime = bean.parent.endTime - bean.parent.startTime;
+      int leftTime = bean.startTime - bean.parent.startTime;
+      if (leftTime < 0) {
+        leftTime = 0;
+      }
+      bean.left = leftTime * TIME_TO_DISTANCE + bean.parent.left;
+
+//      if (parentTotalTime > 0) {
+//        //按时间定位置
+//        bean.left =
+//      } else {
+//        //parent时间为0，没法按时间定位置
+//        if (leftBrother == null) {
+//          //表示没有左兄弟
+//          bean.left = bean.parent.left;
+//        } else {
+//          //表示有左兄弟
+//          bean.left = leftBrother.left + leftBrother.w;
+//        }
+//      }
+
+      if (leftBrother == null) {
+        //表示没有左兄弟
+        bean.top = bean.parent.top;
+      } else {
+        //表示有左兄弟
+        bean.top = leftBrother.top + leftBrother.h;
+      }
     }
     print('方法${bean.methodName}计算得到的left:${bean.left} top: ${bean.top}');
 
